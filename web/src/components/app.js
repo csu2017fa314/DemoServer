@@ -5,17 +5,20 @@ export default class App extends React.Component {
         super(props);
         this.state = {
             serverReturned: {
-                aList: [0]
+                aList: [0] //Initialized to zero to prevent map() error on first load (caused by line 18)
             }
         }
     };
 
     render() {
+        //Get list of numbers
         let serverNumbers = this.state.serverReturned.aList;
+
+        //Create list items for each number (displayed in the ul tag)
         let numbers = serverNumbers.map((num) => {
             return <li>{num}</li>;
         });
-        console.log(serverNumbers);
+
         return (
             <div className="app-container">
                 <input className="search-button" type="text" placeholder="Type and press enter"
@@ -51,7 +54,7 @@ export default class App extends React.Component {
         };
         try {
             // Attempt to send `newMap` via a POST request
-            // Notice how the end of the url below matches what the server is listening on
+            // Notice how the end of the url below matches what the server is listening on (found in java code)
             let jsonReturned = await fetch(`http://localhost:4567/testing`,
                 {
                     method: "POST",
