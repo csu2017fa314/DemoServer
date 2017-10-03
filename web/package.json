@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config ./webpack.prod.config.js --progress --colors",
-    "dev": "webpack-dev-server --hot --history-api-fallback --open"
+    "dev": "webpack-dev-server --hot --history-api-fallback"
   },
   "repository": {
     "type": "git"
