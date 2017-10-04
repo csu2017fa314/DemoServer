@@ -38,4 +38,4 @@ $ java -cp target/DemoServer-0.0.1-SNAPSHOT-jar-with-dependencies.jar edu.csu201
 ```
 ### It works (hopefully)
 
-You should now be able to type into the input box and press enter. The server is coded to return the length of the string and show it on the webpage. Comments can be found in the code that explains what each part is doing. If you have any questions feel free to post on Piazza or email the team directly. You may also approach me in person if to talk about this code or to set up a meeting to work through it.
+You should now be able to type into the input box and press enter. The server is coded to return an image url and a list of numbers. These should be displayed on the webpage. If you open the browser console (development tools) I have added a few logs explaining what is happening. Comments can be found in the code that explains what each part is doing. If you have any questions feel free to post on Piazza or email the team directly. You may also approach me in person if to talk about this code or to set up a meeting to work through it.
