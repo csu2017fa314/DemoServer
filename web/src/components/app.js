@@ -5,18 +5,19 @@ export default class App extends React.Component {
         super(props);
         this.state = {
             serverReturned: {
-                aList: [0] //Initialized to zero to prevent map() error on first load (caused by line 18)
+                locations: [0] //Initialized to zero to prevent map() error on first load (caused by line 19)
             }
         }
     };
 
     render() {
-        //Get list of numbers
-        let serverNumbers = this.state.serverReturned.aList;
+        //Get list of locations
+        let serverLocations = this.state.serverReturned.locations;
+        console.log("State is", serverLocations);
 
-        //Create list items for each number (displayed in the ul tag)
-        let numbers = serverNumbers.map((num) => {
-            return <li>{num}</li>;
+        //Create list items for each location (displayed in the ul tag)
+        let locs = serverLocations.map((ll) => {
+            return <li>{ll.name}</li>;
         });
 
         return (
@@ -28,7 +29,7 @@ export default class App extends React.Component {
                     <img width="75%" src={this.state.serverReturned.svg}/>
                 </h1>
                 <ul>
-                    {numbers}
+                    {locs}
                 </ul>
             </div>
         )
@@ -62,7 +63,7 @@ export default class App extends React.Component {
                 });
             // Wait for server to return and convert it to json.
             let ret = await jsonReturned.json();
-            console.log("Got back ", JSON.parse(ret));
+            console.log("Got back ", Object.values(JSON.parse(ret)));
             this.setState({
                 serverReturned: JSON.parse(ret)
             });

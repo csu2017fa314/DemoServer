@@ -1,5 +1,6 @@
 package edu.csu2017fa314.DemoServer.Server;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -8,18 +9,18 @@ import java.util.Arrays;
 
 public class ServerResponse {
     private String svg = "";
-    private int[] aList;
+    private ArrayList<Location> locations;
 
-    public ServerResponse(String svg) {
+    public ServerResponse(String svg, ArrayList locations) {
         this.svg = svg;
-        this.aList = new int[]{1,2,3,4,5,6,7};
+        this.locations = locations;
     }
 
     @Override
     public String toString() {
         return "ServerResponse{" +
                 "svg='" + svg + '\'' +
-                ", aList=" + Arrays.toString(aList) +
+                ", locations=" + locations +
                 '}';
     }
 }
