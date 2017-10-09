@@ -50,6 +50,7 @@ public class Server {
 
         // Create object with svg file path and list to return to server
         ServerResponse sRes = new ServerResponse("./your.svg", q.query("SELECT * FROM airports LIMIT 10")); //TODO update file path to your svg, change to "./testing.png" for a sample image
+
         System.out.println("Sending \"" + sRes.toString() + "\" to server.");
 
         //Convert response to json

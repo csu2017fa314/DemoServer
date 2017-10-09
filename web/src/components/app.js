@@ -4,21 +4,31 @@ export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            serverReturned: {
-                locations: [0] //Initialized to zero to prevent map() error on first load (caused by line 19)
-            }
+            serverReturned: null
         }
     };
 
     render() {
-        //Get list of locations
-        let serverLocations = this.state.serverReturned.locations;
-        console.log("State is", serverLocations);
+        let serverLocations;
+        let locs;
+        let svg;
+        if (this.state.serverReturned) { // if this.state.serverReturned is not null
+            //Get list of numbers
+            serverLocations = this.state.serverReturned.locations;
+          
+            /*Create an array of HTML list items. The Array.map function in Javascript passes each individual element
+            * of an array (in this case serverNumbers is the array and "num" is the name chosen for the individual element)
+            * through a function and returns a new array with the mapped elements.
+            * In this case f: num -> <li>num</li>, so numbers will be an array that looks like:
+            * [<li>0</li>,<li>1</li>...]
+            */
+            locs = serverLocations.map((ll) => {
+                return <li>{ll.name}</li>;
+            });
 
-        //Create list items for each location (displayed in the ul tag)
-        let locs = serverLocations.map((ll) => {
-            return <li>{ll.name}</li>;
-        });
+            // set the local variable scg to this.state.serverReturned.svg
+            svg = this.state.serverReturned.svg;
+        }
 
         return (
             <div className="app-container">
@@ -26,8 +36,11 @@ export default class App extends React.Component {
                        onKeyUp={this.keyUp.bind(this)} autoFocus/>
                 <br/>
                 <h1>
-                    <img width="75%" src={this.state.serverReturned.svg}/>
+                    {/* In the constructor, this.state.serverReturned.svg is not assigned a value. This means the image
+                    will only display once the serverReturned state variable is set to the received json in line 73*/}
+                    <img width="75%" src={svg}/>
                 </h1>
+                {/* Display the array of HTML list items created on line 18 */}
                 <ul>
                     {locs}
                 </ul>
@@ -36,9 +49,9 @@ export default class App extends React.Component {
     }
 
     // This function waits until enter is pressed on the event (input)
-    // Very bad implementation
+    // A better implementation would be to have a Javascript form with an onSubmit event that calls fetch
     keyUp(event) {
-        if (event.which === 13) { // Waiting for enter to be pressed
+        if (event.which === 13) { // Waiting for enter to be pressed. Enter is key 13: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
             this.fetch(event.target.value); // Call fetch and pass whatever text is in the input box
         }
     }
@@ -56,6 +69,7 @@ export default class App extends React.Component {
         try {
             // Attempt to send `newMap` via a POST request
             // Notice how the end of the url below matches what the server is listening on (found in java code)
+            // By default, Spark uses port 4567
             let jsonReturned = await fetch(`http://localhost:4567/testing`,
                 {
                     method: "POST",
@@ -63,7 +77,10 @@ export default class App extends React.Component {
                 });
             // Wait for server to return and convert it to json.
             let ret = await jsonReturned.json();
-            console.log("Got back ", Object.values(JSON.parse(ret)));
+            // Log the received JSON to the browser console
+            console.log("Got back ", JSON.parse(ret));
+            // set the serverReturned state variable to the received json.
+            // this way, attributes of the json can be accessed via this.state.serverReturned.[field]
             this.setState({
                 serverReturned: JSON.parse(ret)
             });
