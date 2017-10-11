@@ -20,8 +20,8 @@ public class QueryBuilder {
     public ArrayList<Location> query(String query) { // Command line args contain username and password
         ArrayList<Location> locations = new ArrayList<>();
         String myDriver = "com.mysql.jdbc.Driver"; // Add dependencies in pom.xml
-        //String myUrl = "jdbc:mysql://faure.cs.colostate.edu/cs314"; // Use this line if connecting inside CSU's network
-        String myUrl = "jdbc:mysql://localhost/cs314"; // Use this line if tunneling 3307 traffic through shell
+        String myUrl = "jdbc:mysql://faure.cs.colostate.edu/cs314"; // Use this line if connecting inside CSU's network
+        //String myUrl = "jdbc:mysql://localhost/cs314"; // Use this line if tunneling 3307 traffic through shell
         try { // Connect to the database
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, user, pass);
@@ -50,5 +50,11 @@ public class QueryBuilder {
             System.err.println(e.getMessage());
         }
         return locations;
+    }
+
+    public static void main(String[] args) {
+        QueryBuilder q = new QueryBuilder("myou", "830652516"); // Create new QueryBuilder instance and pass in credentials
+        ArrayList<Location> queryResults = q.query("SELECT * FROM airports LIMIT 10");
+        System.out.println(queryResults);
     }
 }

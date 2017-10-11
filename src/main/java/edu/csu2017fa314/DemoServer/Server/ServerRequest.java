@@ -5,20 +5,20 @@ package edu.csu2017fa314.DemoServer.Server;
  */
 
 public class ServerRequest {
-    private String name = "";
+    private String query = "";
     private String id = "";
 
     public ServerRequest(String name, String id) {
-        this.name = name;
+        this.query = query;
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getQuery() {
+        return query;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setQuery(String name) {
+        this.query = query;
     }
 
     public String getId() {
@@ -32,7 +32,7 @@ public class ServerRequest {
     @Override
     public String toString() {
         return "Request{" +
-                "name='" + name + '\'' +
+                "query='" + query + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }

@@ -14,6 +14,7 @@ public class ServerResponse {
     public ServerResponse(String svg, ArrayList locations) {
         this.svg = svg;
         this.locations = locations;
+        System.out.println(this.toString());
     }
 
     @Override
