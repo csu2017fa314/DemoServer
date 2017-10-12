@@ -21,7 +21,7 @@ public class QueryBuilder {
         ArrayList<Location> locations = new ArrayList<>();
         String myDriver = "com.mysql.jdbc.Driver"; // Add dependencies in pom.xml
         String myUrl = "jdbc:mysql://faure.cs.colostate.edu/cs314"; // Use this line if connecting inside CSU's network
-        //String myUrl = "jdbc:mysql://localhost/cs314"; // Use this line if tunneling 3307 traffic through shell
+        //String myUrl = "jdbc:mysql://localhost/cs314"; // Use this line if tunneling 3306 traffic through shell
         try { // Connect to the database
             Class.forName(myDriver);
             Connection conn = DriverManager.getConnection(myUrl, user, pass);

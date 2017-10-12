@@ -48,7 +48,7 @@ public class Server {
         // Client sends query under "name" field in received json:
         String searched = sRec.getQuery();
         // Get something from the server
-        QueryBuilder q = new QueryBuilder("myou", "830652516"); // Create new QueryBuilder instance and pass in credentials
+        QueryBuilder q = new QueryBuilder("username", "password"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
         String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%s' OR name LIKE '%s' OR type LIKE '%s' LIMIT 10", searched, searched, searched);
         ArrayList<Location> queryResults = q.query(queryString);
 
