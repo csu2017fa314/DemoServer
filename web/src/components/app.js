@@ -9,21 +9,21 @@ export default class App extends React.Component {
     };
 
     render() {
-        let serverNumbers;
-        let numbers;
+        let serverLocations;
+        let locs;
         let svg;
         if (this.state.serverReturned) { // if this.state.serverReturned is not null
             //Get list of numbers
-            serverNumbers = this.state.serverReturned.aList;
-
+            serverLocations = this.state.serverReturned.locations;
+          
             /*Create an array of HTML list items. The Array.map function in Javascript passes each individual element
-            * of an array (in this case serverNumbers is the array and "num" is the name chosen for the individual element)
+            * of an array (in this case serverLocations is the array and "location" is the name chosen for the individual element)
             * through a function and returns a new array with the mapped elements.
-            * In this case f: num -> <li>num</li>, so numbers will be an array that looks like:
-            * [<li>0</li>,<li>1</li>...]
+            * In this case f: location -> <li>location.name</li>, so the array will look like:
+            * [<li>[name1]</li>,<li>[name2]</li>...]
             */
-            numbers = serverNumbers.map((num) => {
-                return <li>{num}</li>;
+            locs = serverLocations.map((location) => {
+                return <li>{location.name}</li>;
             });
 
             // set the local variable scg to this.state.serverReturned.svg
@@ -32,18 +32,18 @@ export default class App extends React.Component {
 
         return (
             <div className="app-container">
-                <input className="search-button" type="text" placeholder="Type and press enter"
+                <input className="search-button" type="text" placeholder="Enter a search like denver"
                        onKeyUp={this.keyUp.bind(this)} autoFocus/>
                 <br/>
+                {/* Display the array of HTML list items created on line 18 */}
+                <ul>
+                    {locs}
+                </ul>
                 <h1>
                     {/* In the constructor, this.state.serverReturned.svg is not assigned a value. This means the image
                     will only display once the serverReturned state variable is set to the received json in line 73*/}
                     <img width="75%" src={svg}/>
                 </h1>
-                {/* Display the array of HTML list items created on line 18 */}
-                <ul>
-                    {numbers}
-                </ul>
             </div>
         )
     }
@@ -63,7 +63,7 @@ export default class App extends React.Component {
         /*  IMPORTANT: This object must match the structure of whatever
             object the server is reading into (in this case DataClass) */
         let newMap = {
-            name: input,
+            query: input,
             id: "1",
         };
         try {
