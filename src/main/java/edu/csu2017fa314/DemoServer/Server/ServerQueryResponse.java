@@ -7,12 +7,11 @@ import java.util.Arrays;
  * Created by sswensen on 10/1/17.
  */
 
-public class ServerResponse {
-    private String svg = "";
+public class ServerQueryResponse {
+    private String response = "query";
     private ArrayList<Location> locations;
 
-    public ServerResponse(String svg, ArrayList locations) {
-        this.svg = svg;
+    public ServerQueryResponse(ArrayList locations) {
         this.locations = locations;
         System.out.println(this.toString());
     }
@@ -20,7 +19,7 @@ public class ServerResponse {
     @Override
     public String toString() {
         return "ServerResponse{" +
-                "svg='" + svg + '\'' +
+                "response='" + response + '\'' +
                 ", locations=" + locations +
                 '}';
     }
