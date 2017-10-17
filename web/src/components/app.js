@@ -6,7 +6,8 @@ export default class App extends React.Component {
         super(props);
         this.state = {
             queryResults : [],
-            svgResults : null
+            svgResults : null,
+            input : ""
         }
     };
 
@@ -39,8 +40,12 @@ export default class App extends React.Component {
 
         return (
             <div className="app-container">
-                <input size="35" className="search-button" type="text" placeholder="type a query like 'denver' and press enter"
-                       onKeyUp={this.keyUp.bind(this)} autoFocus/>
+                <form onSubmit={this.handleSubmit.bind(this)}>
+                    <input size="35" className="search-button" type="text"
+                           onKeyUp={this.keyUp.bind(this)} placeholder="Enter a search term like denver" autoFocus/>
+                    <input type="submit" value="Submit" />
+                </form>
+
 
                 <br />
                 <br />
@@ -58,12 +63,23 @@ export default class App extends React.Component {
         )
     }
 
+
+
     // This function waits until enter is pressed on the event (input)
     // A better implementation would be to have a Javascript form with an onSubmit event that calls fetch
     keyUp(event) {
         if (event.which === 13) { // Waiting for enter to be pressed. Enter is key 13: https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-            this.fetch("query", event.target.value); // Call fetch and pass whatever text is in the input box
+            this.fetch("query", this.state.input); // Call fetch and pass whatever text is in the input box
+        } else {
+            this.setState({
+                input: event.target.value
+            });
         }
+    }
+
+    handleSubmit(event) {
+        this.fetch("query", this.state.input);
+        event.preventDefault();
     }
 
     // if the "Click here for an SVG button is clicked"

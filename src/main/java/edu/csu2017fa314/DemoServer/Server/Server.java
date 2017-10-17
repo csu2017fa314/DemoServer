@@ -23,7 +23,9 @@ public class Server {
 
     public void serve() {
         Gson g = new Gson();
-        post("/testing", this::testing, g::toJson); // Create new listener
+        post("/testing", (rec, res) -> {
+            return g.toJson(testing(rec, res));
+        }); // Create new listener
     }
 
     // called by testing method if the client requests an svg
@@ -44,7 +46,7 @@ public class Server {
     private Object serveQuery(String searched) {
         Gson gson = new Gson();
         QueryBuilder q = new QueryBuilder("tjohns0n", "830235106"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
-        String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%s' OR name LIKE '%s' OR type LIKE '%s' LIMIT 10", searched, searched, searched);
+        String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%%%s%%' OR name LIKE '%%%s%%' OR type LIKE '%%%s%%' LIMIT 10", searched, searched, searched);
         ArrayList<Location> queryResults = q.query(queryString);
 
         // Create object with svg file path and array of matching database entries to return to server
