@@ -45,7 +45,7 @@ public class Server {
     // called by testing method if client requests a search
     private Object serveQuery(String searched) {
         Gson gson = new Gson();
-        QueryBuilder q = new QueryBuilder("tjohns0n", "830235106"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
+        QueryBuilder q = new QueryBuilder("user", "pass"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
         String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%%%s%%' OR name LIKE '%%%s%%' OR type LIKE '%%%s%%' LIMIT 10", searched, searched, searched);
         ArrayList<Location> queryResults = q.query(queryString);
 
