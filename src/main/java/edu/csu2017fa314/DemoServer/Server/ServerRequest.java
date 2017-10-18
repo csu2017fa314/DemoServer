@@ -5,35 +5,35 @@ package edu.csu2017fa314.DemoServer.Server;
  */
 
 public class ServerRequest {
-    private String query = "";
-    private String id = "";
+    private String request = "";
+    private String description = "";
 
-    public ServerRequest(String name, String id) {
-        this.query = query;
-        this.id = id;
+    public ServerRequest(String request, String description) {
+        this.request = request;
+        this.description = description;
     }
 
-    public String getQuery() {
-        return query;
+    public String getRequest() {
+        return request;
     }
 
-    public void setQuery(String name) {
-        this.query = query;
+    public void setQuery(String request) {
+        this.request = request;
     }
 
-    public String getId() {
-        return id;
+    public String getDescription() {
+        return description;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
     public String toString() {
         return "Request{" +
-                "query='" + query + '\'' +
-                ", id='" + id + '\'' +
+                "request='" + request + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 }
