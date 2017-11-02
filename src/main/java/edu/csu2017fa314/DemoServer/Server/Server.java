@@ -43,7 +43,7 @@ public class Server {
         System.out.println("Got \"" + sRec.toString() + "\" from server.");
         // Sending a file back requires different response headers
         setHeadersFile(res);
-        writeFile(sRec.getDescription().get(0));
+        writeFile(res, sRec.getDescription().get(0));
         return res;
     }
 
@@ -104,11 +104,11 @@ public class Server {
     }
 
     // called by testing method if client requests to download a location file
-    private void writeFile(String locations) {
+    private void writeFile(Response res, String locations) {
         Gson gson = new Gson();
 
         try {
-            PrintWriter fileWriter = new PrintWriter(new File("selection.json"));
+            PrintWriter fileWriter = new PrintWriter(res.raw().getOutputStream());
             fileWriter.println(locations);
             fileWriter.flush();
             fileWriter.close();

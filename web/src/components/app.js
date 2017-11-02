@@ -204,7 +204,7 @@ export default class App extends React.Component {
         let jsonReturned = await fetch(`http://localhost:4567/download`,
         {
             method: "POST",
-            body: JSON.stringify(clientRequest)
+            body: [JSON.stringify(clientRequest)]
         });
         console.log(jsonReturned.body)
         //window.open(jsonReturned.body.);
