@@ -49,12 +49,14 @@ export default class App extends React.Component {
 
                 <br />
                 <br />
-                <button type="button" onClick={this.buttonClicked.bind(this)}>Click here for an SVG</button>
+                
+                <button type="button" onClick={this.saveButtonClicked.bind(this)} disabled={!this.state.queryResults}>Save these locations</button>
                 <br/>
                 {/* Display the array of HTML list items created on line 18 */}
                 <ul>
                     {locs}
                 </ul>
+                <button type="button" onClick={this.svgButtonClicked.bind(this)}>Click here for an SVG</button>
                 <h1>
                     {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
                     {renderedSvg}
@@ -83,8 +85,12 @@ export default class App extends React.Component {
     }
 
     // if the "Click here for an SVG button is clicked"
-    buttonClicked(event) {
+    svgButtonClicked(event) {
         this.fetch("svg", event.target.value);
+    }
+
+    saveButtonClicked(event) {
+        this.getFile();
     }
 
     // This function sends `input` the server and updates the state with whatever is returned
@@ -142,6 +148,22 @@ export default class App extends React.Component {
             console.error("Error talking to server");
             console.error(e);
         }
+    }
+
+    // download a file of the array a query returns
+    async getFile() {
+        let clientRequest = {
+            request: "save",
+            description: JSON.stringify(this.state.queryResults)
+        };
+
+        let jsonReturned = await fetch(`http://localhost:4567/download`,
+        {
+            method: "POST",
+            body: JSON.stringify(clientRequest)
+        });
+        console.log(jsonReturned.body)
+        //window.open(jsonReturned.body.);
     }
 
 }

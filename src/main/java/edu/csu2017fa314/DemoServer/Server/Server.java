@@ -7,6 +7,9 @@ import edu.csu2017fa314.DemoServer.Database.QueryBuilder;
 import spark.Request;
 import spark.Response;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import static spark.Spark.post;
@@ -26,6 +29,22 @@ public class Server {
         post("/testing", (rec, res) -> {
             return g.toJson(testing(rec, res));
         }); // Create new listener
+        post("/download", (rec, res) -> {
+            download(rec, res);
+            return g.toJson(rec);
+        });
+    }
+
+    private Object download(Request rec, Response res) {
+        JsonParser parser = new JsonParser();
+        JsonElement elm = parser.parse(rec.body());
+        Gson gson = new Gson();
+        ServerRequest sRec = gson.fromJson(elm, ServerRequest.class);
+        System.out.println("Got \"" + sRec.toString() + "\" from server.");
+        // Sending a file back requires different response headers
+        setHeadersFile(res);
+        writeFile(sRec.getDescription());
+        return res;
     }
 
     // called by testing method if the client requests an svg
@@ -58,9 +77,21 @@ public class Server {
         return gson.toJson(sRes, ServerQueryResponse.class);
     }
 
+    // called by testing method if client requests to download a location file
+    private void writeFile(String locations) {
+        Gson gson = new Gson();
+
+        try {
+            PrintWriter fileWriter = new PrintWriter(new File("selection.json"));
+            fileWriter.println(locations);
+            fileWriter.flush();
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private Object testing(Request rec, Response res) {
-        // Set the return headers
-        setHeaders(res);
 
         // Init json parser
         JsonParser parser = new JsonParser();
@@ -82,9 +113,12 @@ public class Server {
         // Because both possible requests from the client have the same format, 
         // we can check the "type" of request we've received: either "query" or "svg"
         if (sRec.getRequest().equals("query")) {
+            // Set the return headers
+            setHeaders(res);
             return serveQuery(sRec.getDescription());
         // assume if the request is not "query" it is "svg":
         } else {
+            setHeaders(res);
             return serveSvg();
         }
     }
@@ -96,5 +130,13 @@ public class Server {
         // Ok for browser to call even if different host host
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "*");
+    }
+
+    private void setHeadersFile(Response res) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "*");
+
+        res.raw().setContentType("application/json");
+        res.raw().setHeader("Content-Disposition", "attachment; filename=selection.json");
     }
 }
