@@ -72,7 +72,7 @@ export default class App extends React.Component {
         )
     }
 
-
+    // File reading is almost identical how you did it in Sprint 1
     uploadButtonClicked(acceptedFiles) {
         console.log("Accepting drop");
         acceptedFiles.forEach(file => {
@@ -83,18 +83,16 @@ export default class App extends React.Component {
                 return function (e) {
                     let JsonObj = JSON.parse(e.target.result);
                     console.log(JsonObj);
+                    // Do something with the file:
                     this.browseFile(JsonObj);
                 };
             })(file).bind(this);
 
             fr.readAsText(file);
         });
-        console.log("Calling fetch");
-        console.log(this.state.sysFile);
-        
-        
     }
 
+    // Set the uploaded JSON file to a state variable and send it to fetch method
     async browseFile(file) {
         console.log("Got file:", file);
         this.setState({
@@ -140,6 +138,9 @@ export default class App extends React.Component {
         let clientRequest;
         // if "enter" is pressed in the input box
         if (type === "query") {
+            /* We now pass input as an element of an array
+               because we changed the ServerRequest class to take an ArrayList
+            */
             clientRequest = {
                 request: "query",
                 description: [input],
@@ -147,6 +148,7 @@ export default class App extends React.Component {
 
         // if the button is clicked:
         } else if (type === "upload") {
+            // Send entire destinations array
             clientRequest = {
                 request: "upload",
                 description: input

@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 public class ServerRequest {
     private String request = "";
+
+    // description changed to ArrayList to handle a description array
+    // can access .get(0) of description for single element descriptions
     private ArrayList<String> description = null;
 
     public ServerRequest(String request, ArrayList<String> description) {

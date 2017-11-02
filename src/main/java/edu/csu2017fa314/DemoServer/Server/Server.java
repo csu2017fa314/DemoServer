@@ -61,9 +61,12 @@ public class Server {
         return gson.toJson(ssres, ServerSvgResponse.class);
     }
 
+    // if the user uploads a file
     private Object serveUpload(ArrayList<String> locations) {
         Gson gson = new Gson();
-        QueryBuilder q = new QueryBuilder("user", "pass");
+
+        // Build a query of every code in the destinations file:
+        QueryBuilder q = new QueryBuilder("user", "pass"); // TODO: replace with credentials 
         String queryString = "SELECT * FROM airports WHERE ";
         for (int i = 0; i < locations.size(); i++) {
             if (i == locations.size() - 1) {
@@ -72,9 +75,13 @@ public class Server {
                 queryString += "code LIKE '%" + locations.get(i) + "%' OR ";
             }
         }
+
+        // Query database with queryString
         ArrayList<Location> queryResults = q.query(queryString);
 
+        // Same response structure as the query request
         ServerResponse serverResponse = new ServerResponse(queryResults);
+        // set response type to upload
         serverResponse.setResponseType("upload");
 
         return gson.toJson(serverResponse, ServerResponse.class);
@@ -111,6 +118,7 @@ public class Server {
     }
 
     private Object testing(Request rec, Response res) {
+        setHeaders(res);
 
         // Init json parser
         JsonParser parser = new JsonParser();
@@ -133,14 +141,12 @@ public class Server {
         // we can check the "type" of request we've received: either "query" or "svg"
         if (sRec.getRequest().equals("query")) {
             // Set the return headers
-            setHeaders(res);
             return serveQuery(sRec.getDescription().get(0));
-        // assume if the request is not "query" it is "svg":
+        // if the user uploads a file
         } else if (sRec.getRequest().equals("upload")) {
-            setHeaders(res);
             return serveUpload(sRec.getDescription());
+        // assume if the request is not "query" it is "svg":
         } else {
-            setHeaders(res);
             return serveSvg();
         }
     }

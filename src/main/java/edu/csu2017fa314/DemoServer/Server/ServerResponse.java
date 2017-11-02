@@ -16,6 +16,8 @@ public class ServerResponse {
         System.out.println(this.toString());
     }
 
+    // set to "upload" if responding to an upload request
+    // set to "query" if responding a query request
     public void setResponseType(String response) {
         this.response = response;
     }
