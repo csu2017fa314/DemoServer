@@ -1,4 +1,6 @@
 import React from 'react';
+
+import Dropzone from 'react-dropzone';
 import InlineSVG from 'svg-inline-react';
 
 export default class App extends React.Component {
@@ -7,7 +9,8 @@ export default class App extends React.Component {
         this.state = {
             queryResults : [],
             svgResults : null,
-            input : ""
+            input : "",
+            sysFile: null
         }
     };
 
@@ -49,23 +52,56 @@ export default class App extends React.Component {
 
                 <br />
                 <br />
+                <Dropzone className="dropzone-style" onDrop={this.uploadButtonClicked.bind(this)}>
+                    <button type="button" >Upload a location file</button>
+                </Dropzone>
                 
                 <button type="button" onClick={this.saveButtonClicked.bind(this)} disabled={!this.state.queryResults}>Save these locations</button>
                 <br/>
                 {/* Display the array of HTML list items created on line 18 */}
+                
+                <button type="button" onClick={this.svgButtonClicked.bind(this)}>Click here for an SVG</button>
+                <br />
+                {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
+                {renderedSvg}
+
                 <ul>
                     {locs}
                 </ul>
-                <button type="button" onClick={this.svgButtonClicked.bind(this)}>Click here for an SVG</button>
-                <h1>
-                    {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
-                    {renderedSvg}
-                </h1>
             </div>
         )
     }
 
 
+    uploadButtonClicked(acceptedFiles) {
+        console.log("Accepting drop");
+        acceptedFiles.forEach(file => {
+            console.log("Filename:", file.name, "File:", file);
+            console.log(JSON.stringify(file));
+            let fr = new FileReader();
+            fr.onload = (function () {
+                return function (e) {
+                    let JsonObj = JSON.parse(e.target.result);
+                    console.log(JsonObj);
+                    this.browseFile(JsonObj);
+                };
+            })(file).bind(this);
+
+            fr.readAsText(file);
+        });
+        console.log("Calling fetch");
+        console.log(this.state.sysFile);
+        
+        
+    }
+
+    async browseFile(file) {
+        console.log("Got file:", file);
+        this.setState({
+            sysFile: file
+        })
+        this.fetch("upload", this.state.sysFile.destinations);
+    }
 
     // This function waits until enter is pressed on the event (input)
     // A better implementation would be to have a Javascript form with an onSubmit event that calls fetch
@@ -95,6 +131,7 @@ export default class App extends React.Component {
 
     // This function sends `input` the server and updates the state with whatever is returned
     async fetch(type, input) {
+        console.log("entered fetch");
         // Create object to send to server
 
         /*  IMPORTANT: This object must match the structure of whatever
@@ -105,14 +142,19 @@ export default class App extends React.Component {
         if (type === "query") {
             clientRequest = {
                 request: "query",
-                description: input,
+                description: [input],
             };
 
         // if the button is clicked:
+        } else if (type === "upload") {
+            clientRequest = {
+                request: "upload",
+                description: input
+            }
         } else {
             clientRequest = {
                 request: "svg",
-                description: ""
+                description: []
             }
         }
         try {
@@ -131,7 +173,7 @@ export default class App extends React.Component {
             console.log("Got back ", returnedJson);
 
             // if the response field of the returned json is "query", that means the server responded to the SQL query request
-            if (returnedJson.response === "query") {
+            if (returnedJson.response === "query" || returnedJson.response === "upload") {
                 this.setState({
                     queryResults: returnedJson.locations
                 });

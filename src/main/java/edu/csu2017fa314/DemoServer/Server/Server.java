@@ -43,7 +43,7 @@ public class Server {
         System.out.println("Got \"" + sRec.toString() + "\" from server.");
         // Sending a file back requires different response headers
         setHeadersFile(res);
-        writeFile(sRec.getDescription());
+        writeFile(sRec.getDescription().get(0));
         return res;
     }
 
@@ -61,6 +61,25 @@ public class Server {
         return gson.toJson(ssres, ServerSvgResponse.class);
     }
 
+    private Object serveUpload(ArrayList<String> locations) {
+        Gson gson = new Gson();
+        QueryBuilder q = new QueryBuilder("user", "pass");
+        String queryString = "SELECT * FROM airports WHERE ";
+        for (int i = 0; i < locations.size(); i++) {
+            if (i == locations.size() - 1) {
+                queryString += "code LIKE '%" + locations.get(i) + "%';";
+            } else {
+                queryString += "code LIKE '%" + locations.get(i) + "%' OR ";
+            }
+        }
+        ArrayList<Location> queryResults = q.query(queryString);
+
+        ServerResponse serverResponse = new ServerResponse(queryResults);
+        serverResponse.setResponseType("upload");
+
+        return gson.toJson(serverResponse, ServerResponse.class);
+    }
+
     // called by testing method if client requests a search
     private Object serveQuery(String searched) {
         Gson gson = new Gson();
@@ -69,12 +88,12 @@ public class Server {
         ArrayList<Location> queryResults = q.query(queryString);
 
         // Create object with svg file path and array of matching database entries to return to server
-        ServerQueryResponse sRes = new ServerQueryResponse(queryResults); //TODO update file path to your svg, change to "./testing.png" for a sample image
-
+        ServerResponse sRes = new ServerResponse(queryResults); //TODO update file path to your svg, change to "./testing.png" for a sample image
+        sRes.setResponseType("query");
         System.out.println("Sending \"" + sRes.toString() + "\" to server.");
 
         //Convert response to json
-        return gson.toJson(sRes, ServerQueryResponse.class);
+        return gson.toJson(sRes, ServerResponse.class);
     }
 
     // called by testing method if client requests to download a location file
@@ -115,8 +134,11 @@ public class Server {
         if (sRec.getRequest().equals("query")) {
             // Set the return headers
             setHeaders(res);
-            return serveQuery(sRec.getDescription());
+            return serveQuery(sRec.getDescription().get(0));
         // assume if the request is not "query" it is "svg":
+        } else if (sRec.getRequest().equals("upload")) {
+            setHeaders(res);
+            return serveUpload(sRec.getDescription());
         } else {
             setHeaders(res);
             return serveSvg();

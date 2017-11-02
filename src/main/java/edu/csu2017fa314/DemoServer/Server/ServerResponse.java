@@ -7,13 +7,17 @@ import java.util.Arrays;
  * Created by sswensen on 10/1/17.
  */
 
-public class ServerQueryResponse {
-    private String response = "query";
+public class ServerResponse {
+    private String response;
     private ArrayList<Location> locations;
 
-    public ServerQueryResponse(ArrayList locations) {
+    public ServerResponse(ArrayList locations) {
         this.locations = locations;
         System.out.println(this.toString());
+    }
+
+    public void setResponseType(String response) {
+        this.response = response;
     }
 
     @Override
