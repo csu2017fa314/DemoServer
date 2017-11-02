@@ -81,4 +81,4 @@ bower.json
 # Ignore Byebug command history file.
 .byebug_history
 /public/packs
-/node_modules
+**/node_modules
