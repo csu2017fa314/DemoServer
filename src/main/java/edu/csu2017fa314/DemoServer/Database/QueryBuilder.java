@@ -33,8 +33,9 @@ public class QueryBuilder {
                         while(rs.next()) {
                             String id = rs.getString("id");
                             String name = rs.getString("name");
+                            String code = rs.getString("code");
                             System.out.printf("%s,%s\n", id, name);
-                            locations.add(new Location(id, name));
+                            locations.add(new Location(id, name, code));
                         }
                     } finally {
                         rs.close();

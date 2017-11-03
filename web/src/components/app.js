@@ -1,4 +1,6 @@
 import React from 'react';
+
+import Dropzone from 'react-dropzone';
 import InlineSVG from 'svg-inline-react';
 
 export default class App extends React.Component {
@@ -7,7 +9,8 @@ export default class App extends React.Component {
         this.state = {
             queryResults : [],
             svgResults : null,
-            input : ""
+            input : "",
+            sysFile: null
         }
     };
 
@@ -30,7 +33,6 @@ export default class App extends React.Component {
                 console.log(location.name);
                 return <li>{location.name}</li>;
             });
-
         }
         // Once the server sends back an SVG, set the local variable "renderedSvg" to be the image
         if (this.state.svgResults) {
@@ -49,21 +51,55 @@ export default class App extends React.Component {
 
                 <br />
                 <br />
-                <button type="button" onClick={this.buttonClicked.bind(this)}>Click here for an SVG</button>
+                {/*Use a dropzone as before*/}
+                <Dropzone className="dropzone-style" onDrop={this.uploadButtonClicked.bind(this)}>
+                    <button type="button" >Upload a location file</button>
+                </Dropzone>
+                
+                <button type="button" onClick={this.saveButtonClicked.bind(this)}>Save these locations</button>
                 <br/>
                 {/* Display the array of HTML list items created on line 18 */}
+                
+                <button type="button" onClick={this.svgButtonClicked.bind(this)}>Click here for an SVG</button>
+                <br />
+                {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
+                {renderedSvg}
+
                 <ul>
                     {locs}
                 </ul>
-                <h1>
-                    {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
-                    {renderedSvg}
-                </h1>
             </div>
         )
     }
 
+    // File reading is almost identical how you did it in Sprint 1
+    uploadButtonClicked(acceptedFiles) {
+        console.log("Accepting drop");
+        acceptedFiles.forEach(file => {
+            console.log("Filename:", file.name, "File:", file);
+            console.log(JSON.stringify(file));
+            let fr = new FileReader();
+            fr.onload = (function () {
+                return function (e) {
+                    let JsonObj = JSON.parse(e.target.result);
+                    console.log(JsonObj);
+                    // Do something with the file:
+                    this.browseFile(JsonObj);
+                };
+            })(file).bind(this);
 
+            fr.readAsText(file);
+        });
+    }
+
+    // Set the uploaded JSON file to a state variable and send it to fetch method
+    async browseFile(file) {
+        console.log("Got file:", file);
+        this.setState({
+            sysFile: file
+        })
+        this.fetch("upload", this.state.sysFile.destinations);
+    }
 
     // This function waits until enter is pressed on the event (input)
     // A better implementation would be to have a Javascript form with an onSubmit event that calls fetch
@@ -83,12 +119,17 @@ export default class App extends React.Component {
     }
 
     // if the "Click here for an SVG button is clicked"
-    buttonClicked(event) {
+    svgButtonClicked(event) {
         this.fetch("svg", event.target.value);
+    }
+
+    saveButtonClicked(event) {
+        this.getFile();
     }
 
     // This function sends `input` the server and updates the state with whatever is returned
     async fetch(type, input) {
+        console.log("entered fetch");
         // Create object to send to server
 
         /*  IMPORTANT: This object must match the structure of whatever
@@ -97,16 +138,25 @@ export default class App extends React.Component {
         let clientRequest;
         // if "enter" is pressed in the input box
         if (type === "query") {
+            /* We now pass input as an element of an array
+               because we changed the ServerRequest class to take an ArrayList
+            */
             clientRequest = {
                 request: "query",
-                description: input,
+                description: [input],
             };
 
         // if the button is clicked:
+        } else if (type === "upload") {
+            // Send entire destinations array
+            clientRequest = {
+                request: "upload",
+                description: input
+            }
         } else {
             clientRequest = {
                 request: "svg",
-                description: ""
+                description: []
             }
         }
         try {
@@ -125,7 +175,8 @@ export default class App extends React.Component {
             console.log("Got back ", returnedJson);
 
             // if the response field of the returned json is "query", that means the server responded to the SQL query request
-            if (returnedJson.response === "query") {
+            // The file upload should also display the same thing
+            if (returnedJson.response === "query" || returnedJson.response === "upload") {
                 this.setState({
                     queryResults: returnedJson.locations
                 });
@@ -142,6 +193,36 @@ export default class App extends React.Component {
             console.error("Error talking to server");
             console.error(e);
         }
+    }
+
+    // download a file of the array a query returns
+    async getFile() {
+        // assign all the airport codes of the displayed locations to an array
+        let locs = this.state.queryResults.map((location) => {
+            return location.code;
+        });
+        // send these codes back to the server to write the file
+        // Javascript does not have access to a computer's file system, so this must be done from the server
+        let clientRequest = {
+            request: "save",
+            description: locs
+        };
+
+        let response = await fetch(`http://localhost:4567/download`,
+        {
+            method: "POST",
+            body: JSON.stringify(clientRequest)
+        });
+        
+        // Unlike the other responses, we don't conver this one to JSON
+        // Instead, grab the file in the response with response.blob()
+        response.blob().then(function(myBlob) {
+            // create a URL for the file
+            let fileUrl = URL.createObjectURL(myBlob);
+            // Open the file. Normally, a text file would open in the browser by default,
+            // which is why we set the content-type differently in the server code. 
+            window.open(fileUrl);
+        });
     }
 
 }

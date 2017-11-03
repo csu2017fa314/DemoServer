@@ -1,14 +1,19 @@
 package edu.csu2017fa314.DemoServer.Server;
 
+import java.util.ArrayList;
+
 /**
  * Created by sswensen on 10/1/17.
  */
 
 public class ServerRequest {
     private String request = "";
-    private String description = "";
 
-    public ServerRequest(String request, String description) {
+    // description changed to ArrayList to handle a description array
+    // can access .get(0) of description for single element descriptions
+    private ArrayList<String> description;
+
+    public ServerRequest(String request, ArrayList<String> description) {
         this.request = request;
         this.description = description;
     }
@@ -21,12 +26,13 @@ public class ServerRequest {
         this.request = request;
     }
 
-    public String getDescription() {
+    public ArrayList<String> getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(ArrayList<String> description) {
+        this.description = new ArrayList<String>();
+        this.description.addAll(description);
     }
 
     @Override
