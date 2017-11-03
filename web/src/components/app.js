@@ -198,18 +198,41 @@ export default class App extends React.Component {
 
     // download a file of the array a query returns
     async getFile() {
-        // assign all the airport codes of the displayed locations to an array
-        let locs = this.state.queryResults.map((location) => {
+         // assign all the airport codes of the displayed locations to an array
+         let locs = this.state.queryResults.map((location) => {
             return location.code;
         });
-        // send these codes back to the server to write the file
-        // Javascript does not have access to a computer's file system, so this must be done from the server
-        let clientRequest = {
-            request: "save",
-            description: locs
+
+        // create an object in the format of the download file:
+        let locationFile = {
+            title : "selection",
+            destinations: locs
         };
 
-        let response = await fetch(window.location.href.substring(0, window.location.href.length - 6) + ":4567/download",
+        // stringify the object
+        let asJSONString = JSON.stringify(locationFile);
+        
+        // Javascript code to create an <a> element with a link to the file
+        let pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(asJSONString));
+        // Download the file instead of opening it:
+        pom.setAttribute('download', "download.json");
+        
+        // Javascript to click the hidden link we created, causing the file to download
+        if (document.createEvent) {
+            let event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        } else {
+            pom.click();
+        }
+        
+        // remove hidden link from page
+        pom.parentNode.removeChild(pom);
+
+        // Previous method:
+        /*
+        let response = await fetch(`http://localhost:4567/download`,
         {
             method: "POST",
             body: JSON.stringify(clientRequest)
@@ -223,7 +246,7 @@ export default class App extends React.Component {
             // Open the file. Normally, a text file would open in the browser by default,
             // which is why we set the content-type differently in the server code. 
             window.open(fileUrl);
-        });
+        });*/
     }
 
 }
