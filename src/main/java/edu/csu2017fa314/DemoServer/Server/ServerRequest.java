@@ -11,7 +11,7 @@ public class ServerRequest {
 
     // description changed to ArrayList to handle a description array
     // can access .get(0) of description for single element descriptions
-    private ArrayList<String> description = null;
+    private ArrayList<String> description;
 
     public ServerRequest(String request, ArrayList<String> description) {
         this.request = request;
@@ -31,7 +31,8 @@ public class ServerRequest {
     }
 
     public void setDescription(ArrayList<String> description) {
-        this.description = description;
+        this.description = new ArrayList<String>();
+        this.description.addAll(description);
     }
 
     @Override

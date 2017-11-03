@@ -198,16 +198,20 @@ export default class App extends React.Component {
     async getFile() {
         let clientRequest = {
             request: "save",
-            description: JSON.stringify(this.state.queryResults)
+            description: ["30FD"]
         };
 
         let jsonReturned = await fetch(`http://localhost:4567/download`,
         {
             method: "POST",
-            body: [JSON.stringify(clientRequest)]
+            body: JSON.stringify(clientRequest)
         });
-        console.log(jsonReturned.body)
-        //window.open(jsonReturned.body.);
+        //let fileBlob = jsonReturned.blob;
+        //let fileUrl = URL.createObjectURL(fileBlob);
+        jsonReturned.blob().then(function(myBlob) {
+            let fileUrl = URL.createObjectURL(myBlob);
+            window.open(fileUrl);
+        });
     }
 
 }

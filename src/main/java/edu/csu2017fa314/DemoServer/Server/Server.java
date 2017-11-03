@@ -7,9 +7,7 @@ import edu.csu2017fa314.DemoServer.Database.QueryBuilder;
 import spark.Request;
 import spark.Response;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.ArrayList;
 
 import static spark.Spark.post;
@@ -31,7 +29,7 @@ public class Server {
         }); // Create new listener
         post("/download", (rec, res) -> {
             download(rec, res);
-            return g.toJson(rec);
+            return rec.raw();
         });
     }
 
@@ -40,10 +38,12 @@ public class Server {
         JsonElement elm = parser.parse(rec.body());
         Gson gson = new Gson();
         ServerRequest sRec = gson.fromJson(elm, ServerRequest.class);
-        System.out.println("Got \"" + sRec.toString() + "\" from server.");
+        System.out.println(sRec);
+
         // Sending a file back requires different response headers
         setHeadersFile(res);
-        writeFile(res, sRec.getDescription().get(0));
+        writeFile(res, sRec.getDescription());
+
         return res;
     }
 
@@ -78,6 +78,7 @@ public class Server {
 
         // Query database with queryString
         ArrayList<Location> queryResults = q.query(queryString);
+        System.out.println(queryResults);
 
         // Same response structure as the query request
         ServerResponse serverResponse = new ServerResponse(queryResults);
@@ -104,14 +105,27 @@ public class Server {
     }
 
     // called by testing method if client requests to download a location file
-    private void writeFile(Response res, String locations) {
+    private void writeFile(Response res, ArrayList<String> locations) {
         Gson gson = new Gson();
 
         try {
-            PrintWriter fileWriter = new PrintWriter(res.raw().getOutputStream());
-            fileWriter.println(locations);
+            PrintWriter fileWriter = new PrintWriter(new File("selection.json"));
+            for (String location : locations) {
+                fileWriter.println(location);
+            }
             fileWriter.flush();
             fileWriter.close();
+
+            // This should send the file to browser
+            OutputStream out = res.raw().getOutputStream();
+            FileInputStream in = new FileInputStream("selection.json");
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = in.read(buffer)) > 0){
+                out.write(buffer, 0, length);
+            }
+            in.close();
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -161,10 +175,9 @@ public class Server {
     }
 
     private void setHeadersFile(Response res) {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "*");
-
-        res.raw().setContentType("application/json");
-        res.raw().setHeader("Content-Disposition", "attachment; filename=selection.json");
+        res.raw().addHeader("Access-Control-Allow-Origin", "*");
+        res.raw().addHeader("Access-Control-Allow-Headers", "*");
+        res.raw().setContentType("application/force-download");
+        res.raw().addHeader("Content-Disposition", "attachment; filename=\"selection.json\"");
     }
 }
