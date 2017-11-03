@@ -163,7 +163,9 @@ export default class App extends React.Component {
             // Attempt to send `clientRequest` via a POST request
             // Notice how the end of the url below matches what the server is listening on (found in java code)
             // By default, Spark uses port 4567
-            let jsonReturned = await fetch(`http://localhost:4567/testing`,
+            let serverUrl = window.location.href.substring(0, window.location.href.length - 6) + ":4567/testing";
+            console.log(serverUrl);
+            let jsonReturned = await fetch(serverUrl,
                 {
                     method: "POST",
                     body: JSON.stringify(clientRequest)
