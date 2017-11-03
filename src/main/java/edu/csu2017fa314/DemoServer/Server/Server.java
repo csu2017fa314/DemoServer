@@ -133,9 +133,9 @@ public class Server {
         String queryString = "SELECT * FROM airports WHERE ";
         for (int i = 0; i < locations.size(); i++) {
             if (i == locations.size() - 1) {
-                queryString += "code LIKE '%" + locations.get(i) + "%';";
+                queryString += "code = '" + locations.get(i) + "';";
             } else {
-                queryString += "code LIKE '%" + locations.get(i) + "%' OR ";
+                queryString += "code = '" + locations.get(i) + "' OR ";
             }
         }
 
