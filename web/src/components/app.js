@@ -226,6 +226,9 @@ export default class App extends React.Component {
         } else {
             pom.click();
         }
+        
+        // remove hidden link from page
+        pom.parentNode.removeChild(pom);
 
         // Previous method:
         /*
