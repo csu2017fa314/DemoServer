@@ -33,7 +33,6 @@ export default class App extends React.Component {
                 console.log(location.name);
                 return <li>{location.name}</li>;
             });
-
         }
         // Once the server sends back an SVG, set the local variable "renderedSvg" to be the image
         if (this.state.svgResults) {
@@ -52,11 +51,12 @@ export default class App extends React.Component {
 
                 <br />
                 <br />
+                {/*Use a dropzone as before*/}
                 <Dropzone className="dropzone-style" onDrop={this.uploadButtonClicked.bind(this)}>
                     <button type="button" >Upload a location file</button>
                 </Dropzone>
                 
-                <button type="button" onClick={this.saveButtonClicked.bind(this)} disabled={!this.state.queryResults}>Save these locations</button>
+                <button type="button" onClick={this.saveButtonClicked.bind(this)}>Save these locations</button>
                 <br/>
                 {/* Display the array of HTML list items created on line 18 */}
                 
@@ -175,6 +175,7 @@ export default class App extends React.Component {
             console.log("Got back ", returnedJson);
 
             // if the response field of the returned json is "query", that means the server responded to the SQL query request
+            // The file upload should also display the same thing
             if (returnedJson.response === "query" || returnedJson.response === "upload") {
                 this.setState({
                     queryResults: returnedJson.locations
@@ -196,20 +197,30 @@ export default class App extends React.Component {
 
     // download a file of the array a query returns
     async getFile() {
+        // assign all the airport codes of the displayed locations to an array
+        let locs = this.state.queryResults.map((location) => {
+            return location.code;
+        });
+        // send these codes back to the server to write the file
+        // Javascript does not have access to a computer's file system, so this must be done from the server
         let clientRequest = {
             request: "save",
-            description: ["30FD"]
+            description: locs
         };
 
-        let jsonReturned = await fetch(`http://localhost:4567/download`,
+        let response = await fetch(`http://localhost:4567/download`,
         {
             method: "POST",
             body: JSON.stringify(clientRequest)
         });
-        //let fileBlob = jsonReturned.blob;
-        //let fileUrl = URL.createObjectURL(fileBlob);
-        jsonReturned.blob().then(function(myBlob) {
+        
+        // Unlike the other responses, we don't conver this one to JSON
+        // Instead, grab the file in the response with response.blob()
+        response.blob().then(function(myBlob) {
+            // create a URL for the file
             let fileUrl = URL.createObjectURL(myBlob);
+            // Open the file. Normally, a text file would open in the browser by default,
+            // which is why we set the content-type differently in the server code. 
             window.open(fileUrl);
         });
     }

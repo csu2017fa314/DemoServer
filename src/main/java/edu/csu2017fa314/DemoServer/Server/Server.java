@@ -26,106 +26,51 @@ public class Server {
         Gson g = new Gson();
         post("/testing", (rec, res) -> {
             return g.toJson(testing(rec, res));
-        }); // Create new listener
+        });
+        // Here we define a second event listener
         post("/download", (rec, res) -> {
+            // call the download function
             download(rec, res);
+            // return the raw HttpServletResponse from the Response
+            // Note that we do not send a JSON
             return rec.raw();
         });
     }
 
+    // Called if the user requests to download a trip
     private Object download(Request rec, Response res) {
+        // As before, parse the request and convert it to a Java class with Gson:
         JsonParser parser = new JsonParser();
         JsonElement elm = parser.parse(rec.body());
         Gson gson = new Gson();
         ServerRequest sRec = gson.fromJson(elm, ServerRequest.class);
-        System.out.println(sRec);
 
         // Sending a file back requires different response headers
         setHeadersFile(res);
+        // Write a file to the response
         writeFile(res, sRec.getDescription());
 
         return res;
     }
 
-    // called by testing method if the client requests an svg
-    private Object serveSvg() {
-        Gson gson = new Gson();
-        // Instead of writing the SVG to a file, we send it in plaintext back to the client to be rendered inline
-        String sampleSvg =
-                "<svg width=\"120\" height=\"100\" xmlns=\"http://www.w3.org/2000/svg\">" +
-                "  <line id=\"north\" y2=\"100\" x2=\"120\" y1=\"0\" x1=\"0\" stroke-width=\"5\" stroke=\"red\"/>" +
-                "  <line id=\"west\" y2=\"100\" x2=\"0\" y1=\"0\" x1=\"120\" stroke-width=\"5\" stroke=\"blue\"/>" +
-                " </svg>";
-        ServerSvgResponse ssres = new ServerSvgResponse(120, 100, sampleSvg);
-
-        return gson.toJson(ssres, ServerSvgResponse.class);
-    }
-
-    // if the user uploads a file
-    private Object serveUpload(ArrayList<String> locations) {
-        Gson gson = new Gson();
-
-        // Build a query of every code in the destinations file:
-        QueryBuilder q = new QueryBuilder("user", "pass"); // TODO: replace with credentials 
-        String queryString = "SELECT * FROM airports WHERE ";
-        for (int i = 0; i < locations.size(); i++) {
-            if (i == locations.size() - 1) {
-                queryString += "code LIKE '%" + locations.get(i) + "%';";
-            } else {
-                queryString += "code LIKE '%" + locations.get(i) + "%' OR ";
-            }
-        }
-
-        // Query database with queryString
-        ArrayList<Location> queryResults = q.query(queryString);
-        System.out.println(queryResults);
-
-        // Same response structure as the query request
-        ServerResponse serverResponse = new ServerResponse(queryResults);
-        // set response type to upload
-        serverResponse.setResponseType("upload");
-
-        return gson.toJson(serverResponse, ServerResponse.class);
-    }
-
-    // called by testing method if client requests a search
-    private Object serveQuery(String searched) {
-        Gson gson = new Gson();
-        QueryBuilder q = new QueryBuilder("user", "pass"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
-        String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%%%s%%' OR name LIKE '%%%s%%' OR type LIKE '%%%s%%' LIMIT 10", searched, searched, searched);
-        ArrayList<Location> queryResults = q.query(queryString);
-
-        // Create object with svg file path and array of matching database entries to return to server
-        ServerResponse sRes = new ServerResponse(queryResults); //TODO update file path to your svg, change to "./testing.png" for a sample image
-        sRes.setResponseType("query");
-        System.out.println("Sending \"" + sRes.toString() + "\" to server.");
-
-        //Convert response to json
-        return gson.toJson(sRes, ServerResponse.class);
-    }
-
-    // called by testing method if client requests to download a location file
     private void writeFile(Response res, ArrayList<String> locations) {
-        Gson gson = new Gson();
-
         try {
-            PrintWriter fileWriter = new PrintWriter(new File("selection.json"));
-            for (String location : locations) {
-                fileWriter.println(location);
+            // Write our file directly to the response rather than to a file
+            PrintWriter fileWriter = new PrintWriter(res.raw().getOutputStream());
+            // Ideally, the user will be able to name their own trips. We hard code it here:
+            fileWriter.println("{ \"title\" : \"The Coolest Trip\",\n" +
+                    "  \"destinations\" : [");
+            for (int i = 0; i < locations.size(); i++) {
+                if (i < locations.size() - 1) {
+                    fileWriter.println("\"" + locations.get(i) + "\",");
+                } else {
+                    fileWriter.println("\"" + locations.get(i) + "\"]}");
+                }
             }
+            // Important: flush and close the writer or a blank file will be sent
             fileWriter.flush();
             fileWriter.close();
 
-            // This should send the file to browser
-            OutputStream out = res.raw().getOutputStream();
-            FileInputStream in = new FileInputStream("selection.json");
-            byte[] buffer = new byte[4096];
-            int length;
-            while ((length = in.read(buffer)) > 0){
-                out.write(buffer, 0, length);
-            }
-            in.close();
-            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -165,6 +110,64 @@ public class Server {
         }
     }
 
+    // called by testing method if the client requests an svg
+    private Object serveSvg() {
+        Gson gson = new Gson();
+        // Instead of writing the SVG to a file, we send it in plaintext back to the client to be rendered inline
+        String sampleSvg =
+                "<svg width=\"120\" height=\"100\" xmlns=\"http://www.w3.org/2000/svg\">" +
+                        "  <line id=\"north\" y2=\"100\" x2=\"120\" y1=\"0\" x1=\"0\" stroke-width=\"5\" stroke=\"red\"/>" +
+                        "  <line id=\"west\" y2=\"100\" x2=\"0\" y1=\"0\" x1=\"120\" stroke-width=\"5\" stroke=\"blue\"/>" +
+                        " </svg>";
+        ServerSvgResponse ssres = new ServerSvgResponse(120, 100, sampleSvg);
+
+        return gson.toJson(ssres, ServerSvgResponse.class);
+    }
+
+    // if the user uploads a file
+    private Object serveUpload(ArrayList<String> locations) {
+        Gson gson = new Gson();
+
+        // Build a query of every code in the destinations file:
+        QueryBuilder q = new QueryBuilder("user", "pass"); // TODO: replace with credentials
+        String queryString = "SELECT * FROM airports WHERE ";
+        for (int i = 0; i < locations.size(); i++) {
+            if (i == locations.size() - 1) {
+                queryString += "code LIKE '%" + locations.get(i) + "%';";
+            } else {
+                queryString += "code LIKE '%" + locations.get(i) + "%' OR ";
+            }
+        }
+
+        // Query database with queryString
+        ArrayList<Location> queryResults = q.query(queryString);
+
+        // Same response structure as the query request
+        ServerResponse serverResponse = new ServerResponse(queryResults);
+        // set response type to upload
+        serverResponse.setResponseType("upload");
+
+        return gson.toJson(serverResponse, ServerResponse.class);
+    }
+
+    // called by testing method if client requests a search
+    private Object serveQuery(String searched) {
+        Gson gson = new Gson();
+        QueryBuilder q = new QueryBuilder("user", "pass"); // Create new QueryBuilder instance and pass in credentials //TODO update credentials
+        String queryString = String.format("SELECT * FROM airports WHERE municipality LIKE '%%%s%%' OR name LIKE '%%%s%%' OR type LIKE '%%%s%%' LIMIT 10", searched, searched, searched);
+        ArrayList<Location> queryResults = q.query(queryString);
+
+        // Create object with svg file path and array of matching database entries to return to server
+        ServerResponse sRes = new ServerResponse(queryResults);
+        sRes.setResponseType("query");
+        System.out.println("Sending \"" + sRes.toString() + "\" to server.");
+
+        //Convert response to json
+        return gson.toJson(sRes, ServerResponse.class);
+    }
+
+
+
     private void setHeaders(Response res) {
         // Declares returning type json
         res.header("Content-Type", "application/json");
@@ -175,8 +178,15 @@ public class Server {
     }
 
     private void setHeadersFile(Response res) {
+        /* Unlike the other responses, the file request sends back an actual file. This means
+        that we have to work with the raw HttpServletRequest that Spark's Response class is built
+        on.
+         */
+        // First, add the same Access Control headers as before
         res.raw().addHeader("Access-Control-Allow-Origin", "*");
         res.raw().addHeader("Access-Control-Allow-Headers", "*");
+        // Set the content type to "force-download." Basically, we "trick" the browser with
+        // an unknown file type to make it download the file instead of opening it.
         res.raw().setContentType("application/force-download");
         res.raw().addHeader("Content-Disposition", "attachment; filename=\"selection.json\"");
     }
