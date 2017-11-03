@@ -164,7 +164,6 @@ export default class App extends React.Component {
             // Notice how the end of the url below matches what the server is listening on (found in java code)
             // By default, Spark uses port 4567
             let serverUrl = window.location.href.substring(0, window.location.href.length - 6) + ":4567/testing";
-            console.log(serverUrl);
             let jsonReturned = await fetch(serverUrl,
                 {
                     method: "POST",
@@ -210,7 +209,7 @@ export default class App extends React.Component {
             description: locs
         };
 
-        let response = await fetch(`http://localhost:4567/download`,
+        let response = await fetch(window.location.href.substring(0, window.location.href.length - 6) + ":4567/download",
         {
             method: "POST",
             body: JSON.stringify(clientRequest)
