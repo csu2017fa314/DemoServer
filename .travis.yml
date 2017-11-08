@@ -1,0 +1,15 @@
+sudo: required
+env:
+  global:
+    - CC_TEST_REPORTER_ID=1becf8cdf2ca2b7c51d36d21a67c0349b4ad9cf217187c182ecfb16fad011d54
+language: java
+jdk:
+  - oraclejdk8
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - mvn clean test jacoco:report coveralls:report
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
