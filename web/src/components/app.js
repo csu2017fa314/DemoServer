@@ -2,6 +2,7 @@ import React from 'react';
 
 import Dropzone from 'react-dropzone';
 import InlineSVG from 'svg-inline-react';
+import { Button, ButtonGroup, Col, FormGroup, FormControl, Grid, ListGroup, ListGroupItem, Modal, Row } from 'react-bootstrap';
 
 export default class App extends React.Component {
     constructor(props) {
@@ -10,7 +11,16 @@ export default class App extends React.Component {
             queryResults : [],
             svgResults : null,
             input : "",
-            sysFile: null
+            sysFile: null,
+            modalOpen : false,
+            h3Style: {
+                textAlign: 'center',
+                color: 'DimGrey'
+            },
+            h4Style: {
+                textAlign: 'center',
+                color: 'SlateGrey'
+            }
         }
     };
 
@@ -31,8 +41,12 @@ export default class App extends React.Component {
             */
             locs = serverLocations.map((location) => {
                 console.log(location.name);
-                return <li>{location.name}</li>;
+                return <ListGroupItem>{location.name}</ListGroupItem>;
             });
+            if (locs.length > 0) {
+                locs.splice(0, 0, <h1>Here is your trip:</h1>)
+            }
+            
         }
         // Once the server sends back an SVG, set the local variable "renderedSvg" to be the image
         if (this.state.svgResults) {
@@ -42,34 +56,70 @@ export default class App extends React.Component {
 
         return (
             <div className="app-container">
+                <Grid>
+                
                 <form onSubmit={this.handleSubmit.bind(this)}>
-                    <input size="35" className="search-button" type="text"
+                <FormGroup>
+                    <Col  md={10}>
+                    <FormControl type="text"
                            onKeyUp={this.keyUp.bind(this)} placeholder="Enter a search term like denver" autoFocus/>
-                    <input type="submit" value="Submit" />
+                    </Col>
+                    <Col  md={2}>
+                    <FormControl bsStyle="primary" type="submit" value="Submit" />
+                    </Col>
+                </FormGroup>
                 </form>
 
-
-                <br />
-                <br />
-                {/*Use a dropzone as before*/}
-                <Dropzone className="dropzone-style" onDrop={this.uploadButtonClicked.bind(this)}>
-                    <button type="button" >Upload a location file</button>
-                </Dropzone>
+                <Row>
                 
-                <button type="button" onClick={this.saveButtonClicked.bind(this)}>Save these locations</button>
-                <br/>
+                <ButtonGroup justified>
+                
+                <ButtonGroup><Button onClick={this.openModal.bind(this)} type="button">Load trip</Button></ButtonGroup>
+                <Modal show={this.state.modalOpen} onHide={this.closeModal.bind(this)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Load your trip</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Dropzone className="dropzone-style" onDrop={this.uploadButtonClicked.bind(this)}>
+                            <h3 style={this.state.h3Style}>Upload or drop a trip JSON here</h3>
+                            <Button block bsStyle="primary" type="button">Upload</Button> 
+                        </Dropzone>
+                        <h4 style={this.state.h4Style}>- or -</h4>
+                        <h3 style={this.state.h3Style}>Load trip from server</h3>
+                        <h4 style={this.state.h4Style}>Feature coming 2018</h4>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button bsStyle="danger" onClick={this.closeModal.bind(this)}>Cancel</Button>
+                    </Modal.Footer>
+                </Modal>
+                
+                <ButtonGroup><Button onClick={this.saveButtonClicked.bind(this)}>Save trip</Button></ButtonGroup>
+                
                 {/* Display the array of HTML list items created on line 18 */}
                 
-                <button type="button" onClick={this.svgButtonClicked.bind(this)}>Click here for an SVG</button>
-                <br />
+                <ButtonGroup><Button type="button" onClick={this.svgButtonClicked.bind(this)}>Get SVG</Button></ButtonGroup>
+                </ButtonGroup>
+                </Row>
                 {/* Display the local variable renderedSvg. It is either null or an <svg> tag containing the image*/}
-                {renderedSvg}
-
-                <ul>
+                <Row>
+                    {renderedSvg}
+                </Row>
+                <Row>
+                <ListGroup>
                     {locs}
-                </ul>
+                </ListGroup>
+                </Row>
+                </Grid>
             </div>
         )
+    }
+
+    closeModal() {
+        this.setState({ modalOpen: false });
+    }
+    
+    openModal() {
+        this.setState({ modalOpen: true });
     }
 
     // File reading is almost identical how you did it in Sprint 1
@@ -84,6 +134,7 @@ export default class App extends React.Component {
                     let JsonObj = JSON.parse(e.target.result);
                     console.log(JsonObj);
                     // Do something with the file:
+                    this.closeModal();
                     this.browseFile(JsonObj);
                 };
             })(file).bind(this);
