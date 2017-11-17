@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-To use this project first make sure you have `npm` or `yarn` installed. These are dependency managers that will download everything you need for the project.
+To use this project first make sure you have `npm` or `yarn` installed. These are dependency managers that will download everything you need for the project.   
 
 ### Running the frontend (web)
 
