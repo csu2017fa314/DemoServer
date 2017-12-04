@@ -8,7 +8,7 @@
   "scripts": {
     "heroku-prebuild": "cd web; echo Installing dependencies...; npm install --dev",
     "heroku-postbuild": "npm run build",
-    "build": "webpack -p --config ./web/webpack.config.js --progress --colors",
+    "build": "cd web; webpack -p --config ./webpack.config.js --progress --colors",
     "serve": "webpack-dev-server --port 7777",
     "start": "./ss \"java -cp ../target/DemoServer-0.0.1-SNAPSHOT-jar-with-dependencies.jar edu.csu2017fa314.DemoServer.Demo\" \"node app.js\""
   },
