@@ -1,0 +1,1 @@
+web: ./ss "java -cp ../target/DemoServer-0.0.1-SNAPSHOT-jar-with-dependencies.jar edu.csu2017fa314.DemoServer.Demo" "npm start"
